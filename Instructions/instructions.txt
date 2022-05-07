@@ -1,0 +1,28 @@
+Students:
+
+Filippo Brozzi, Person code: 10820817
+Loris Panza, Person code: 10781716
+Andrea Razza, Person cde: 10805438
+
+Inside the archive you'll find:
+1) A src folder containing:
+
+	-".cpp": This file hosts the code to extract the data of the bags needed to compute the kinematics of the mobile robot. It develops a node that will subscribe to the topic /wheel_states, compute the velocity and publish it on the topic /cmd_vel. The computation may be done starting from the data of the "velocity" field of the topic /wheel_states, aka rad/min, or the one in the "position" field of the same topic, aka the ticks count.
+
+	-"odometry_calculator.cpp": This file implements the node responsible for the computation of the odometry. It reads from the /topic /cmd_vel and compute teh estimated position of the robot that may be performed using both the Euler method and the Runge-Kutta method.This method can be select via dinamic reconfigure.
+	The estimated pose will then be published on the topic /odom.
+	It also performs the broadcast of the dinamic tf transformation between the odom reference frame and the base_link reference frame.
+
+	-".cpp": This file computes the estimated velocity of all of the wheels of the robots in rad/min given the velocity of the mobile robot published in the topic /cmd_vel. This velocity will be estimated by "" using the ticks count as starting data. The result of this computation is encoded in a custom message called "WheelsRPM.msg" and published on the /wheels_rpm topic
+
+	-".cpp": this file implements a subscriber to the /robot/pose topic that computes the position in the form (x,y,yaw) and prints it on screen. It is meant to be a tool to compare the estimated pose computed by "odometry_calculator" with the real one, since the latter uses quaternion to represent rotation, while the first one doesn't
+
+	-"world_odom_broadaster.cpp: This file performs the broadcast of a static tf transform between the world reference frame and the odom reference frame, using the values of the inital position of the robot published in the /robot/pose topic from bag1
+
+	-"".cpp This file was used as a tool during the calibration phase. It computes at each time-step the geometric distance between the real and estimated position and the differnce between the real and estimated orientation. It accumulates this two values along the duration of the bag and prints it on screen. It is indeed a metric to be minimized during calibration. This was done by subscribing to two different topics and synchronizing the messages using the message filtering technique.
+
+2)A cfg folder containing:
+	"parameters".cfg: This file hosts the code to dynamically reconfigure the parameter that will select the integration method to be used. It is encoded as an enumeration. To be set one have to use the following command:
+
+	$ rosrun dynamic_reconfigure dynparam set /odomet_calculator integration_method <Euler or RK>
+
